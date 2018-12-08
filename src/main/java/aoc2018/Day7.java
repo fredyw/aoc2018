@@ -4,10 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -84,40 +85,55 @@ public class Day7 {
                     }
                 }
             }
-            Map<String, Integer> map = new HashMap<>();
-            Set<String> set = new HashSet<>();
-            int step = 60;
-            while (!allNodes.isEmpty()) {
-                Iterator<String> iterator = allNodes.iterator();
-                Set<String> tmpSet = new HashSet<>();
-                Set<String> tmpDeps = new HashSet<>();
-                while (iterator.hasNext()) {
-                    String node = iterator.next();
-                    Set<String> nodes = deps.getOrDefault(node, new HashSet<>());
-                    Set<String> clone = new HashSet<>(nodes);
-                    nodes.removeAll(set);
-                    if (nodes.isEmpty()) {
-                        tmpSet.add(node);
-                        String maxNode = !clone.isEmpty() ? Collections.max(clone) : "";
-                        int val = step + node.charAt(0) - 'A' + 1 + map.getOrDefault(maxNode, 0);
-                        tmpDeps.addAll(clone);
-                        map.put(node, val);
-                        iterator.remove();
+            return part2(deps, allNodes, 5, 60);
+        }
+    }
+
+    private static int part2(Map<String, Set<String>> deps, Set<String> allNodes, int workers, int step) {
+        int time = 0;
+        Map<String, Integer> map = new HashMap<>();
+        Set<String> set = new HashSet<>();
+        while (!allNodes.isEmpty()) {
+            Iterator<String> iterator = allNodes.iterator();
+            Set<String> prevDeps = new HashSet<>(map.keySet());
+            while (iterator.hasNext()) {
+                String node = iterator.next();
+                Set<String> nodes = deps.getOrDefault(node, new HashSet<>());
+                Set<String> clone = new HashSet<>(nodes);
+                clone.removeAll(prevDeps);
+                if (clone.isEmpty()) {
+                    int t = time;
+                    for (String n : nodes) {
+                        if (set.remove(n)) {
+                            t = Math.max(t, map.get(n));
+                        }
+                    }
+                    set.add(node);
+                    int val = step + node.charAt(0) - 'A' + 1 + t;
+                    map.put(node, val);
+                    iterator.remove();
+                    if (set.size() == workers) {
+                        break;
                     }
                 }
-                int max = 0;
-                for (String dep : tmpDeps) {
-                    set.remove(dep);
-                    max = Math.max(max, map.get(dep));
+            }
+            List<String> removed = new ArrayList<>();
+            int min = Integer.MAX_VALUE;
+            for (String n : set) {
+                if (min > map.get(n)) {
+                    removed.clear();
+                    removed.add(n);
+                    min = map.get(n);
+                } else if (min == map.get(n)) {
+                    removed.add(n);
                 }
-                set.addAll(tmpSet);
             }
-            int max = 0;
-            for (String s : set) {
-                max = Math.max(max, map.get(s));
+            time = min;
+            for (String n : removed) {
+                set.remove(n);
             }
-            return max;
         }
+        return time;
     }
 
     public static void main(String[] args) throws Exception {
