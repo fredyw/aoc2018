@@ -84,7 +84,27 @@ public class Day12 {
         return sum;
     }
 
+    private static long part2() {
+        // Basically run enough until we figure out the patterns. In this example,
+        // the patterns start to converge at 91st generation and the zero index is 5.
+        int generation = 91;
+        int zeroIndex = 5;
+        String s = "......................................................###...###...###...###...###...###...###...###...###...###...###...###...###...###...###...###...###...###...###...###...###...###....###...###....";
+        int firstPlantIndex = s.indexOf("#");
+        // This is the actual index of the first #.
+        int index = firstPlantIndex - zeroIndex;
+        long val = (50_000_000_000L - generation) + index;
+        long sum = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == '#') {
+                sum += val + i - firstPlantIndex;
+            }
+        }
+        return sum;
+    }
+
     public static void main(String[] args) throws Exception {
         System.out.println(part1());
+        System.out.println(part2());
     }
 }
