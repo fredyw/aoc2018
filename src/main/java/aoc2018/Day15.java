@@ -48,7 +48,8 @@ public class Day15 {
                                 }
                             }
                         }
-                        fullRound = exec(grid, new int[]{row, col}, elves, processed, hp);
+                        fullRound = exec(grid, new int[]{row, col}, elves, processed, hp,
+                            3, 3);
                     } else if (grid[row][col] == 'E') {
                         List<int[]> goblins = new ArrayList<>();
                         for (int i = 0; i < maxRow; i++) {
@@ -58,7 +59,8 @@ public class Day15 {
                                 }
                             }
                         }
-                        fullRound = exec(grid, new int[]{row, col}, goblins, processed, hp);
+                        fullRound = exec(grid, new int[]{row, col}, goblins, processed, hp,
+                            3, 3);
                     }
                 }
             }
@@ -89,8 +91,98 @@ public class Day15 {
         }
     }
 
+    private static int part2() throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(INPUT));
+        for (int elfAttack = 4; elfAttack <= 200; elfAttack++) {
+            char[][] grid = new char[lines.size()][];
+            int[][] hp = new int[lines.size()][];
+            int nElves = 0;
+            for (int i = 0; i < lines.size(); i++) {
+                grid[i] = lines.get(i).toCharArray();
+                hp[i] = new int[grid[i].length];
+                for (int j = 0; j < grid[i].length; j++) {
+                    if (grid[i][j] == 'G') {
+                        hp[i][j] = 200;
+                    } else if (grid[i][j] == 'E') {
+                        hp[i][j] = 200;
+                        nElves++;
+                    }
+                }
+            }
+            int maxRow = grid.length;
+            int maxCol = grid[0].length;
+            int round = 1;
+            while (true) {
+                boolean fullRound = true;
+                boolean[][] processed = new boolean[maxRow][maxCol];
+                outer:
+                for (int row = 0; row < maxRow; row++) {
+                    for (int col = 0; col < maxCol; col++) {
+                        if (processed[row][col]) {
+                            continue;
+                        }
+                        if (grid[row][col] == 'G') {
+                            List<int[]> elves = new ArrayList<>();
+                            for (int i = 0; i < maxRow; i++) {
+                                for (int j = 0; j < maxCol; j++) {
+                                    if (grid[i][j] == 'E') {
+                                        elves.add(new int[]{i, j});
+                                    }
+                                }
+                            }
+                            fullRound = exec(grid, new int[]{row, col}, elves, processed,
+                                hp, 3, elfAttack);
+                        } else if (grid[row][col] == 'E') {
+                            List<int[]> goblins = new ArrayList<>();
+                            for (int i = 0; i < maxRow; i++) {
+                                for (int j = 0; j < maxCol; j++) {
+                                    if (grid[i][j] == 'G') {
+                                        goblins.add(new int[]{i, j});
+                                    }
+                                }
+                            }
+                            fullRound = exec(grid, new int[]{row, col}, goblins, processed,
+                                hp, 3, elfAttack);
+                        }
+                    }
+                }
+                int elves = 0;
+                int eHealth = 0;
+                int gHealth = 0;
+                for (int i = 0; i < maxRow; i++) {
+                    for (int j = 0; j < maxCol; j++) {
+                        if (grid[i][j] == 'G') {
+                            gHealth += hp[i][j];
+                        } else if (grid[i][j] == 'E') {
+                            eHealth += hp[i][j];
+                            elves++;
+                        }
+                    }
+                }
+                if (eHealth <= 0) {
+                    if (!fullRound) {
+                        round--;
+                    }
+                    break; // next attack power
+                }
+                if (gHealth <= 0) {
+                    if (!fullRound) {
+                        round--;
+                    }
+                    if (elves == nElves) {
+                        return round * eHealth;
+                    }
+                    break; // next attack power
+                }
+                round++;
+            }
+        }
+        return 0;
+    }
+
     private static boolean exec(char[][] grid, int[] point, List<int[]> opposite,
-                                boolean[][] processed, int[][] hp) {
+                                boolean[][] processed, int[][] hp, int goblinAttack,
+                                int elfAttack) {
         char type = grid[point[0]][point[1]];
         char oppositeType = type == 'G'? 'E' : 'G';
         int maxRow = grid.length;
@@ -115,7 +207,7 @@ public class Day15 {
             }
         }
         if (adj != null) {
-            hp[adj[0]][adj[1]] -= 3;
+            hp[adj[0]][adj[1]] -= type == 'G' ? goblinAttack : elfAttack;
             if (hp[adj[0]][adj[1]] <= 0) {
                 grid[adj[0]][adj[1]] = '.'; // dead
             }
@@ -170,7 +262,7 @@ public class Day15 {
             }
         }
         if (adj != null) {
-            hp[adj[0]][adj[1]] -= 3;
+            hp[adj[0]][adj[1]] -= type == 'G' ? goblinAttack : elfAttack;
             if (hp[adj[0]][adj[1]] <= 0) {
                 grid[adj[0]][adj[1]] = '.'; // dead
             }
@@ -259,5 +351,6 @@ public class Day15 {
 
     public static void main(String[] args) throws Exception {
         System.out.println(part1());
+        System.out.println(part2());
     }
 }
