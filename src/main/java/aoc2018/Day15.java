@@ -32,11 +32,11 @@ public class Day15 {
         int round = 1;
         while (true) {
             boolean fullRound = true;
-            boolean[][] processed = new boolean[maxRow][maxCol];
+            boolean[][] turns = new boolean[maxRow][maxCol];
             outer:
             for (int row = 0; row < maxRow; row++) {
                 for (int col = 0; col < maxCol; col++) {
-                    if (processed[row][col]) {
+                    if (turns[row][col]) {
                         continue;
                     }
                     if (grid[row][col] == 'G') {
@@ -48,7 +48,7 @@ public class Day15 {
                                 }
                             }
                         }
-                        fullRound = exec(grid, new int[]{row, col}, elves, processed, hp,
+                        fullRound = exec(grid, new int[]{row, col}, elves, turns, hp,
                             3, 3);
                     } else if (grid[row][col] == 'E') {
                         List<int[]> goblins = new ArrayList<>();
@@ -59,7 +59,7 @@ public class Day15 {
                                 }
                             }
                         }
-                        fullRound = exec(grid, new int[]{row, col}, goblins, processed, hp,
+                        fullRound = exec(grid, new int[]{row, col}, goblins, turns, hp,
                             3, 3);
                     }
                 }
@@ -93,7 +93,7 @@ public class Day15 {
 
     private static int part2() throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(INPUT));
-        for (int elfAttack = 4; elfAttack <= 200; elfAttack++) {
+        for (int elfAttack = 25; elfAttack <= 25; elfAttack++) {
             char[][] grid = new char[lines.size()][];
             int[][] hp = new int[lines.size()][];
             int nElves = 0;
@@ -114,11 +114,11 @@ public class Day15 {
             int round = 1;
             while (true) {
                 boolean fullRound = true;
-                boolean[][] processed = new boolean[maxRow][maxCol];
+                boolean[][] turns = new boolean[maxRow][maxCol];
                 outer:
                 for (int row = 0; row < maxRow; row++) {
                     for (int col = 0; col < maxCol; col++) {
-                        if (processed[row][col]) {
+                        if (turns[row][col]) {
                             continue;
                         }
                         if (grid[row][col] == 'G') {
@@ -130,7 +130,7 @@ public class Day15 {
                                     }
                                 }
                             }
-                            fullRound = exec(grid, new int[]{row, col}, elves, processed,
+                            fullRound = exec(grid, new int[]{row, col}, elves, turns,
                                 hp, 3, elfAttack);
                         } else if (grid[row][col] == 'E') {
                             List<int[]> goblins = new ArrayList<>();
@@ -141,7 +141,7 @@ public class Day15 {
                                     }
                                 }
                             }
-                            fullRound = exec(grid, new int[]{row, col}, goblins, processed,
+                            fullRound = exec(grid, new int[]{row, col}, goblins, turns,
                                 hp, 3, elfAttack);
                         }
                     }
@@ -181,7 +181,7 @@ public class Day15 {
     }
 
     private static boolean exec(char[][] grid, int[] point, List<int[]> opposite,
-                                boolean[][] processed, int[][] hp, int goblinAttack,
+                                boolean[][] turns, int[][] hp, int goblinAttack,
                                 int elfAttack) {
         char type = grid[point[0]][point[1]];
         char oppositeType = type == 'G'? 'E' : 'G';
@@ -232,7 +232,7 @@ public class Day15 {
                 }
             }
         }
-        if (move == null) {
+        if (move == null || shortest == Integer.MAX_VALUE) {
             return false;
         }
         hp[move[0]][move[1]] = hp[point[0]][point[1]];
@@ -240,7 +240,7 @@ public class Day15 {
 
         grid[move[0]][move[1]] = grid[point[0]][point[1]];
         grid[point[0]][point[1]] = '.';
-        processed[move[0]][move[1]] = true;
+        turns[move[0]][move[1]] = true;
 
         int mRow = move[0];
         int mCol = move[1];
@@ -285,8 +285,8 @@ public class Day15 {
     private static int shortestPath(char[][] grid, int[] point1, int[] point2) {
         int maxRow = grid.length;
         int maxCol = grid[0].length;
-        if (point1[0] < 0 || point1[1] >= maxRow || point1[1] < 0 || point1[1] >= maxCol ||
-            point2[0] < 0 || point2[1] >= maxRow || point2[1] < 0 || point2[1] >= maxCol) {
+        if (point1[0] < 0 || point1[0] >= maxRow || point1[1] < 0 || point1[1] >= maxCol ||
+            point2[0] < 0 || point2[0] >= maxRow || point2[1] < 0 || point2[1] >= maxCol) {
             return Integer.MAX_VALUE;
         }
         if (grid[point1[0]][point1[1]] != '.' || grid[point2[0]][point2[1]] != '.') {
@@ -310,6 +310,12 @@ public class Day15 {
                     queue.add(new Point(p.row - 1, p.col, p.step + 1));
                 }
             }
+            // left
+            if (p.col - 1 >= 0) {
+                if (grid[p.row][p.col - 1] == '.' && !visited[p.row][p.col - 1]) {
+                    queue.add(new Point(p.row, p.col - 1, p.step + 1));
+                }
+            }
             // right
             if (p.col + 1 < maxRow) {
                 if (grid[p.row][p.col + 1] == '.' && !visited[p.row][p.col + 1]) {
@@ -320,12 +326,6 @@ public class Day15 {
             if (p.row + 1 < maxRow) {
                 if (grid[p.row + 1][p.col] == '.' && !visited[p.row + 1][p.col]) {
                     queue.add(new Point(p.row + 1, p.col, p.step + 1));
-                }
-            }
-            // left
-            if (p.col - 1 >= 0) {
-                if (grid[p.row][p.col - 1] == '.' && !visited[p.row][p.col - 1]) {
-                    queue.add(new Point(p.row, p.col - 1, p.step + 1));
                 }
             }
         }
@@ -350,7 +350,7 @@ public class Day15 {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(part1());
+//        System.out.println(part1());
         System.out.println(part2());
     }
 }
