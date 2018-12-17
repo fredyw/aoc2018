@@ -93,7 +93,7 @@ public class Day15 {
 
     private static int part2() throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(INPUT));
-        for (int elfAttack = 25; elfAttack <= 25; elfAttack++) {
+        for (int elfAttack = 4; elfAttack <= 200; elfAttack++) {
             char[][] grid = new char[lines.size()][];
             int[][] hp = new int[lines.size()][];
             int nElves = 0;
@@ -350,7 +350,7 @@ public class Day15 {
     }
 
     public static void main(String[] args) throws Exception {
-//        System.out.println(part1());
+        System.out.println(part1());
         System.out.println(part2());
     }
 }
