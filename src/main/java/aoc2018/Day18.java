@@ -3,7 +3,9 @@ package aoc2018;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * https://adventofcode.com/2018/day/18
@@ -19,7 +21,62 @@ public class Day18 {
         for (int i = 0; i < lines.size(); i++) {
             grid[i] = lines.get(i).toCharArray();
         }
-        for (int i = 0; i < 10; i++) {
+        return run(grid, 10);
+    }
+
+    private static int part2() throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(INPUT));
+        int maxRow = lines.size();
+        int maxCol = lines.get(0).length();
+        char[][] grid = new char[maxRow][maxCol];
+        for (int i = 0; i < lines.size(); i++) {
+            grid[i] = lines.get(i).toCharArray();
+        }
+        int diff = 0;
+        Map<String, Integer> map = new HashMap<>();
+        for (int i = 0; i < 600; i++) {
+            char[][] tmp = clone(grid);
+            for (int row = 0; row < maxRow; row++) {
+                for (int col = 0; col < maxCol; col++) {
+                    if (tmp[row][col] == '.') {
+                        if (toTree(tmp, maxRow, maxCol, row, col)) {
+                            grid[row][col] = '|';
+                        }
+                    } else if (tmp[row][col] == '|') {
+                        if (toLumberyard(tmp, maxRow, maxCol, row, col)) {
+                            grid[row][col] = '#';
+                        }
+                    } else if (tmp[row][col] == '#') {
+                        if (toOpen(tmp, maxRow, maxCol, row, col)) {
+                            grid[row][col] = '.';
+                        }
+                    }
+                }
+            }
+            String s = toString(grid);
+            if (map.containsKey(s)) {
+                diff = i - map.get(s);
+                break;
+            } else {
+                map.put(s, i);
+            }
+        }
+        int min = map.get(toString(grid));
+        int n = ((1000000000 - min) % diff) + min;
+        lines = Files.readAllLines(Paths.get(INPUT));
+        maxRow = lines.size();
+        maxCol = lines.get(0).length();
+        grid = new char[maxRow][maxCol];
+        for (int i = 0; i < lines.size(); i++) {
+            grid[i] = lines.get(i).toCharArray();
+        }
+        return run(grid, n);
+    }
+
+    private static int run(char[][] grid, int n) {
+        int maxRow = grid.length;
+        int maxCol = grid[0].length;
+        for (int i = 0; i < n; i++) {
             char[][] tmp = clone(grid);
             for (int row = 0; row < maxRow; row++) {
                 for (int col = 0; col < maxCol; col++) {
@@ -51,6 +108,17 @@ public class Day18 {
             }
         }
         return nLumberyards * nTrees;
+    }
+
+    private static String toString(char[][] a) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < a.length; i++) {
+            for (int j = 0; j < a.length; j++) {
+                sb.append(a[i][j]);
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 
     private static char[][] clone(char[][] a) {
@@ -255,5 +323,6 @@ public class Day18 {
 
     public static void main(String[] args) throws Exception {
         System.out.println(part1());
+        System.out.println(part2());
     }
 }
