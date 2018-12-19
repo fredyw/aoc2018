@@ -65,6 +65,35 @@ public class Day19 {
         return register[0];
     }
 
+    private static int part2() throws IOException, InterruptedException {
+        // 3  [0, 3, 0, 3, 10551358, 1] --> seti 1 2 3
+        // 4  [0, 4, 3, 3, 10551358, 1] --> mulr 5 3 2
+        // 5  [0, 5, 0, 3, 10551358, 1] --> eqrr 2 4 2
+        // 6  [0, 6, 0, 3, 10551358, 1] --> addr 2 1 1
+        // 8  [0, 8, 0, 3, 10551358, 1] --> addr 5 0 0
+        // 9  [0, 9, 0, 4, 10551358, 1] --> addi 3 1 3
+        // 10 [0, 10, 0, 4, 10551358, 1] --> gtrr 3 4 2
+        // 11 [0, 11, 0, 4, 10551358, 1] --> addr 1 2 1
+        // 3  [0, 3, 0, 4, 10551358, 1] --> seti 1 2 3
+        // 4  [0, 4, 4, 4, 10551358, 1] --> mulr 5 3 2
+        // 5  [0, 5, 0, 4, 10551358, 1] --> eqrr 2 4 2 --> this is a loop until 10551358
+        // 6  [0, 6, 0, 4, 10551358, 1] --> addr 2 1 1
+        // 8  [0, 8, 0, 4, 10551358, 1] --> addr 5 0 0
+        // 9  [0, 9, 0, 5, 10551358, 1] --> addi 3 1 3
+        // 10 [0, 10, 0, 5, 10551358, 1] --> gtrr 3 4 2
+        // 11 [0, 11, 0, 5, 10551358, 1] --> addr 1 2 1
+        // Apparently finding sum of factors for 10551358 works.
+        // Sum of factors for 10551358 is 1, 2, and 5275679.
+        int n = 10551358;
+        int sum = 0;
+        for (int i = 1; i < n; i++) {
+            if (n % i == 0) {
+                sum += i;
+            }
+        }
+        return n + sum;
+    }
+
     private static int addr(int[] register, int[] instruction) {
         return register[instruction[0]] + register[instruction[1]];
     }
@@ -130,6 +159,7 @@ public class Day19 {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(part1());
+        System.out.println(part2());
+//        System.out.println(part1());
     }
 }
