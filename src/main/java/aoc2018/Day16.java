@@ -320,8 +320,8 @@ public class Day16 {
         return register[instruction[1]] | register[instruction[2]];
     }
 
-    private static int bori(int[] registr, int[] instruction) {
-        return registr[instruction[1]] | instruction[2];
+    private static int bori(int[] register, int[] instruction) {
+        return register[instruction[1]] | instruction[2];
     }
 
     private static int setr(int[] before, int[] instruction) {
